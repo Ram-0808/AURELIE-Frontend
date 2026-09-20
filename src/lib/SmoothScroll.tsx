@@ -1,5 +1,6 @@
 import { useEffect, type ReactNode } from "react";
 import Lenis from "lenis";
+import { frame, cancelFrame } from "framer-motion";
 
 let lenisInstance: Lenis | null = null;
 
@@ -8,7 +9,11 @@ export function getLenis() {
 }
 
 /**
- * Wraps the app in a Lenis-powered smooth scroll context.
+ * Lenis smooth scroll, driven by Framer Motion's frame loop so that
+ * `useScroll`/`useTransform` update on the *same* tick as the scroll
+ * animation. Running both on one clock removes the micro-jitter you get
+ * when Lenis's own rAF and Framer's rAF drift apart.
+ *
  * Respects prefers-reduced-motion by skipping smooth scroll entirely.
  */
 export default function SmoothScroll({ children }: { children: ReactNode }) {
@@ -19,22 +24,26 @@ export default function SmoothScroll({ children }: { children: ReactNode }) {
     if (prefersReduced) return;
 
     const lenis = new Lenis({
-      duration: 1.15,
-      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      // Lower duration = more responsive, less "floaty glide" after you stop.
+      duration: 0.9,
+      // Exponential ease-out; snappier tail than the previous curve.
+      easing: (t: number) => 1 - Math.pow(1 - t, 3),
+      // lerp gives frame-rate-independent smoothing.
+      lerp: 0.1,
       smoothWheel: true,
+      wheelMultiplier: 1,
       touchMultiplier: 1.5,
     });
     lenisInstance = lenis;
 
-    let rafId: number;
-    function raf(time: number) {
-      lenis.raf(time);
-      rafId = requestAnimationFrame(raf);
-    }
-    rafId = requestAnimationFrame(raf);
+    // Drive Lenis from Framer Motion's frame loop (single shared clock).
+    const update = (data: { timestamp: number }) => {
+      lenis.raf(data.timestamp);
+    };
+    frame.update(update, true);
 
     return () => {
-      cancelAnimationFrame(rafId);
+      cancelFrame(update);
       lenis.destroy();
       lenisInstance = null;
     };

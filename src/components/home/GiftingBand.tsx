@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, useSpring } from "framer-motion";
 import SplitText from "../ui/SplitText";
 import MagneticButton from "../ui/MagneticButton";
 
@@ -9,7 +9,8 @@ export default function GiftingBand() {
     target: ref,
     offset: ["start end", "end start"],
   });
-  const y = useTransform(scrollYProgress, [0, 1], ["-14%", "14%"]);
+  const p = useSpring(scrollYProgress, { stiffness: 120, damping: 30, mass: 0.4 });
+  const y = useTransform(p, [0, 1], ["-14%", "14%"]);
 
   return (
     <section ref={ref} className="relative flex h-[88vh] items-center justify-center overflow-hidden bg-charcoal text-ivory">
@@ -17,7 +18,7 @@ export default function GiftingBand() {
         style={{ y }}
         src="https://images.unsplash.com/photo-1549465220-1a8b9238cd48?auto=format&fit=crop&w=2000&q=80"
         alt="AURÉLIE gifting"
-        className="absolute inset-0 h-[128%] w-full object-cover opacity-55"
+        className="gpu absolute inset-0 h-[128%] w-full object-cover opacity-55"
       />
       <div className="absolute inset-0 bg-charcoal/40" />
       <div className="container-luxe relative flex flex-col items-center text-center">

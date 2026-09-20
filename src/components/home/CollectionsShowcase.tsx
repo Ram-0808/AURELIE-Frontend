@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, useSpring } from "framer-motion";
 import { Link } from "react-router-dom";
 import { collections } from "../../data/content";
 import SplitText from "../ui/SplitText";
@@ -15,8 +15,16 @@ export default function CollectionsShowcase() {
     offset: ["start start", "end end"],
   });
 
+  // Smooth the raw scroll progress with a spring so the horizontal glide
+  // eases in/out instead of tracking every scroll delta 1:1 (kills jitter).
+  const smoothProgress = useSpring(scrollYProgress, {
+    stiffness: 120,
+    damping: 30,
+    mass: 0.4,
+  });
+
   // Move the track from 0 to a negative X across the scroll span.
-  const x = useTransform(scrollYProgress, [0, 1], ["2%", "-72%"]);
+  const x = useTransform(smoothProgress, [0, 1], ["2%", "-72%"]);
 
   return (
     <section ref={ref} className="relative h-[320vh] bg-ivory">
@@ -39,7 +47,7 @@ export default function CollectionsShowcase() {
         </div>
 
         {/* Horizontal track */}
-        <motion.div style={{ x }} className="flex gap-6 pl-6 md:gap-10 md:pl-16">
+        <motion.div style={{ x }} className="gpu flex gap-6 pl-6 md:gap-10 md:pl-16">
           {collections.map((c) => (
             <Link
               key={c.id}

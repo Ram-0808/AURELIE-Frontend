@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, useSpring } from "framer-motion";
 import { Link } from "react-router-dom";
 import { heroSlides } from "../../data/content";
 import { luxeEase } from "../../lib/motion";
@@ -11,18 +11,22 @@ export default function Hero() {
     offset: ["start start", "end start"],
   });
 
+  // Spring-smoothed progress so parallax glides rather than snapping to
+  // raw scroll deltas.
+  const p = useSpring(scrollYProgress, { stiffness: 120, damping: 30, mass: 0.4 });
+
   // Parallax: image drifts up slower than scroll, content fades.
-  const imageY = useTransform(scrollYProgress, [0, 1], ["0%", "18%"]);
-  const contentY = useTransform(scrollYProgress, [0, 1], ["0%", "40%"]);
-  const overlayOpacity = useTransform(scrollYProgress, [0, 1], [0.42, 0.72]);
-  const contentOpacity = useTransform(scrollYProgress, [0, 0.6], [1, 0]);
+  const imageY = useTransform(p, [0, 1], ["0%", "18%"]);
+  const contentY = useTransform(p, [0, 1], ["0%", "40%"]);
+  const overlayOpacity = useTransform(p, [0, 1], [0.42, 0.72]);
+  const contentOpacity = useTransform(p, [0, 0.6], [1, 0]);
 
   const slide = heroSlides[0];
 
   return (
     <section ref={ref} className="relative h-[100svh] w-full overflow-hidden bg-charcoal">
       {/* Ken-Burns background */}
-      <motion.div style={{ y: imageY }} className="absolute inset-0 h-[115%]">
+      <motion.div style={{ y: imageY }} className="gpu absolute inset-0 h-[115%]">
         <img
           src={slide.image}
           alt="AURÉLIE Lumière collection"

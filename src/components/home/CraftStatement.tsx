@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, useSpring } from "framer-motion";
 import Reveal from "../ui/Reveal";
 import SplitText from "../ui/SplitText";
 import MagneticButton from "../ui/MagneticButton";
@@ -16,7 +16,8 @@ export default function CraftStatement() {
     target: ref,
     offset: ["start end", "end start"],
   });
-  const imgY = useTransform(scrollYProgress, [0, 1], ["-12%", "12%"]);
+  const p = useSpring(scrollYProgress, { stiffness: 120, damping: 30, mass: 0.4 });
+  const imgY = useTransform(p, [0, 1], ["-12%", "12%"]);
 
   return (
     <section className="overflow-hidden bg-blush py-24 md:py-36">
@@ -75,7 +76,7 @@ export default function CraftStatement() {
               style={{ y: imgY }}
               src="https://images.unsplash.com/photo-1617038220319-276d3cfab638?auto=format&fit=crop&w=1200&q=80"
               alt="A jeweller at work in the AURÉLIE atelier"
-              className="absolute inset-0 h-[124%] w-full object-cover"
+              className="gpu absolute inset-0 h-[124%] w-full object-cover"
             />
           </div>
         </div>

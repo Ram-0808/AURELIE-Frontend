@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, useSpring } from "framer-motion";
 import { journal } from "../data/content";
 import SplitText from "../components/ui/SplitText";
 import Reveal from "../components/ui/Reveal";
@@ -16,7 +16,8 @@ const timeline = [
 export default function About() {
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
-  const y = useTransform(scrollYProgress, [0, 1], ["-12%", "12%"]);
+  const p = useSpring(scrollYProgress, { stiffness: 120, damping: 30, mass: 0.4 });
+  const y = useTransform(p, [0, 1], ["-12%", "12%"]);
 
   return (
     <PageTransition>
@@ -42,7 +43,7 @@ export default function About() {
               style={{ y }}
               src="https://images.unsplash.com/photo-1573408301185-9146fe634ad0?auto=format&fit=crop&w=1200&q=80"
               alt="Craft at AURÉLIE"
-              className="absolute inset-0 h-[124%] w-full object-cover"
+              className="gpu absolute inset-0 h-[124%] w-full object-cover"
             />
           </div>
           <div>
