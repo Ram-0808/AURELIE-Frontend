@@ -35,3 +35,8 @@ dist-ssr
 .env
 .env.local
 .env.*.local
+
+# TypeScript build info / emitted config outputs
+*.tsbuildinfo
+vite.config.js
+vite.config.d.ts
